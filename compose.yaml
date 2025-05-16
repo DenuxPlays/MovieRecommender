@@ -1,0 +1,6 @@
+﻿services:
+  movierecommender:
+    image: movierecommender
+    build:
+      context: .
+      dockerfile: MovieRecommender/Dockerfile
