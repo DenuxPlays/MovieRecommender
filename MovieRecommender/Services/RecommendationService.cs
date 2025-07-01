@@ -59,12 +59,19 @@ public class RecommendationService(
             ProcessRecommendations(userId, recursion + 1);
         }
 
+        var watchedMovies = context.WatchlistEntries
+            .Where(e => e.UserId == userId)
+            .Select(e => e.MovieId)
+            .ToArray();
+
         var globalRecommendations = tmdbService.GetGlobalRecommendations(
             recommendationParams!.RecommendedGenres,
-            recommendationParams.RecommendedKeywords).Result;
+            recommendationParams.RecommendedKeywords,
+            watchedMovies
+        ).Result;
 
         var genreRecommendations = tmdbService.GetMoviesByGenre(
-            recommendationParams.MostWatchedGenre).Result;
+            recommendationParams.MostWatchedGenre, watchedMovies).Result;
 
         // Check if recommendations already exist
         var existingRecommendations = context.Recommendations

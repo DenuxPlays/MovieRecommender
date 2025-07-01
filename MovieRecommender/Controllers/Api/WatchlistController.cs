@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MovieRecommender.Contexts;
-using MovieRecommender.Entities;
 using MovieRecommender.Services;
 
 namespace MovieRecommender.Controllers.Api;
@@ -14,7 +13,8 @@ public class WatchlistController(
     ApplicationDbContext context,
     TmdbService tmdbService,
     AuthenticationService authenticationService,
-    RecommendationService recommendationService
+    RecommendationService recommendationService,
+    WatchlistService watchlistService
 )
     : Controller
 {
@@ -30,21 +30,7 @@ public class WatchlistController(
             return NotFound("Movie not found");
         }
 
-        var entry = await context.WatchlistEntries
-            .FirstOrDefaultAsync(e => e.UserId == user.Id && e.MovieId == request.MovieId);
-
-        if (entry != null) return Ok("Movie already in watchlist");
-
-        var newEntry = new WatchlistEntryEntity
-        {
-            UserId = user.Id,
-            MovieId = request.MovieId,
-        };
-
-        context.WatchlistEntries.Add(newEntry);
-        await context.SaveChangesAsync();
-
-        recommendationService.RunRecommendationProcess(user.Id);
+        await watchlistService.AddToWatchlist(user.Id, request.MovieId);
 
         return Ok("Movie added to watchlist");
     }
@@ -55,17 +41,23 @@ public class WatchlistController(
     {
         var user = await authenticationService.GetUserFromRequest(Request);
 
-        var entry = await context.WatchlistEntries
-            .FirstOrDefaultAsync(e => e.UserId == user.Id && e.MovieId == request.MovieId);
-
-        if (entry == null) return NotFound("Movie not found in watchlist");
-
-        context.WatchlistEntries.Remove(entry);
-        await context.SaveChangesAsync();
-
-        recommendationService.RunRecommendationProcess(user.Id);
+        await watchlistService.RemoveFromWatchlist(user.Id, request.MovieId);
 
         return Ok("Movie removed from watchlist");
+    }
+
+    [HttpGet]
+    [Authorize]
+    public async Task<ActionResult<int[]>> GetWatchlist()
+    {
+        var user = await authenticationService.GetUserFromRequest(Request);
+
+        var watchlist = await context.WatchlistEntries
+            .Where(e => e.UserId == user.Id)
+            .Select(e => e.MovieId)
+            .ToArrayAsync();
+
+        return Ok(watchlist);
     }
 }
 

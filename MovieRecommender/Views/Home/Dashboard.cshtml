@@ -1,0 +1,46 @@
+@model List<MovieRecommender.Views.Api.Movie.MovieResponse>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="/Home/Dashboard">Movie Recommender</a>
+        <div class="navbar-nav ms-auto">
+            <a class="nav-link" href="/Recommendation">Recommendations</a>
+            <a class="nav-link" href="/Home/Search">Search</a>
+            <a class="nav-link" href="/User/Logout">Logout</a>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-4">
+    <h2>Your Watchlist</h2>
+
+    @if (Model.Any())
+    {
+        <div class="row">
+            @foreach (var movie in Model)
+            {
+                <div class="col-md-3 mb-4">
+                    <div class="card">
+                        <img src="@movie.ImageUrl" class="card-img-top" alt="@movie.Title">
+                        <div class="card-body">
+                            <h5 class="card-title">@movie.Title</h5>
+                            <p class="card-text">@movie.ReleaseDate</p>
+                            <form asp-action="RemoveFromWatchlistForm" asp-controller="Watchlist" method="post"
+                                  style="display: inline;">
+                                <input type="hidden" name="movieId" value="@movie.Id"/>
+                                <button type="submit" class="btn btn-danger btn-sm">Remove</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="text-center mt-5">
+            <h4>Your watchlist is empty</h4>
+            <p>Start adding movies to see them here!</p>
+        </div>
+    }
+</div>

@@ -58,11 +58,22 @@ builder.Services.AddSingleton<TMDbClient>(_ =>
     return new TMDbClient(apiKey);
 });
 
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
+
 builder.Services.AddScoped<TmdbService>();
 
 builder.Services.AddScoped<AuthenticationService>();
 
 builder.Services.AddScoped<RecommendationService>();
+
+builder.Services.AddScoped<UserService>();
+
+builder.Services.AddScoped<WatchlistService>();
 
 // Add minimal authentication/authorization for OpenAPI metadata only
 builder.Services.AddAuthentication("Bearer")
@@ -117,5 +128,6 @@ app.MapScalarApiReference("/api");
 // Add authentication/authorization middleware
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseSession();
 
 app.Run();

@@ -1,0 +1,132 @@
+@using MovieRecommender.Views.Api.Movie
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="/Home/Dashboard">Movie Recommender</a>
+        <div class="navbar-nav ms-auto">
+            <a class="nav-link" href="/Recommendation">Recommendations</a>
+            <a class="nav-link" href="/Home/Search">Search</a>
+            <a class="nav-link" href="/User/Logout">Logout</a>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-4">
+    <h1>Your Movie Recommendations</h1>
+
+    <!-- Global Recommendations Section -->
+    <div class="mb-5">
+        <h3 class="mb-3">Global Recommendations</h3>
+        <div id="globalCarousel" class="carousel slide" data-bs-ride="carousel">
+            <div class="carousel-inner">
+                @{
+                    var globalMovies = ViewBag.GlobalRecommendations as List<MovieResponse>;
+                    var globalChunks = globalMovies!.Select((movie, index) => new { Movie = movie, Index = index })
+                        .GroupBy(x => x.Index / 4)
+                        .Select(g => g.Select(x => x.Movie).ToList())
+                        .ToList();
+                }
+                @for (int i = 0; i < globalChunks.Count; i++)
+                {
+                    <div class="carousel-item @(i == 0 ? "active" : "")">
+                        <div class="row">
+                            @foreach (var movie in globalChunks[i])
+                            {
+                                <div class="col-md-3 mb-3">
+                                    <div class="card movie-card">
+                                        <img src="@movie.ImageUrl" class="card-img-top movie-poster"
+                                             alt="@movie.Title">
+                                        <div class="card-body">
+                                            <h6 class="card-title">@movie.Title</h6>
+                                            <p class="card-text">⭐ @movie.ReleaseDate</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+            <button class="carousel-control-prev" type="button" data-bs-target="#globalCarousel" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Previous</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#globalCarousel" data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Next</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Genre Recommendations Section -->
+    <div class="mb-5">
+        <h3 class="mb-3">Genre Recommendations</h3>
+        <div id="genreCarousel" class="carousel slide" data-bs-ride="carousel">
+            <div class="carousel-inner">
+                @{
+                    var genreMovies = ViewBag.GenreRecommendations as List<MovieResponse>;
+                    var genreChunks = genreMovies!.Select((movie, index) => new { Movie = movie, Index = index })
+                        .GroupBy(x => x.Index / 4)
+                        .Select(g => g.Select(x => x.Movie).ToList())
+                        .ToList();
+                }
+                @for (var i = 0; i < genreChunks.Count; i++)
+                {
+                    <div class="carousel-item @(i == 0 ? "active" : "")">
+                        <div class="row">
+                            @foreach (var movie in genreChunks[i])
+                            {
+                                <div class="col-md-3 mb-3">
+                                    <div class="card movie-card">
+                                        <img src="@movie.ImageUrl" class="card-img-top movie-poster"
+                                             alt="@movie.Title">
+                                        <div class="card-body">
+                                            <h6 class="card-title">@movie.Title</h6>
+                                            <p class="card-text">⭐ @movie.ReleaseDate</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+            <button class="carousel-control-prev" type="button" data-bs-target="#genreCarousel" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Previous</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#genreCarousel" data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Next</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<style>
+    .movie-card {
+        transition: transform 0.2s ease;
+        height: 100%;
+    }
+
+    .movie-card:hover {
+        transform: scale(1.02);
+    }
+
+    .movie-poster {
+        height: 300px;
+        object-fit: cover;
+    }
+
+    .carousel-control-prev,
+    .carousel-control-next {
+        width: 5%;
+        background-color: rgba(0, 0, 0, 0.3);
+    }
+
+    .carousel-control-prev-icon,
+    .carousel-control-next-icon {
+        background-color: rgba(0, 0, 0, 0.8);
+        border-radius: 50%;
+        padding: 10px;
+    }
+</style>

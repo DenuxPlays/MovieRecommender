@@ -48,7 +48,8 @@ public class TmdbService(TMDbClient tmDbClient)
     }
 
 
-    public async Task<List<MovieResponse>> GetGlobalRecommendations(int[] genreIds, int[] keywordIds, int page = 1)
+    public async Task<List<MovieResponse>> GetGlobalRecommendations(int[] genreIds, int[] keywordIds,
+        int[] excludedMovies, int page = 1)
     {
         var discoverQuery = tmDbClient.DiscoverMoviesAsync();
         if (discoverQuery == null)
@@ -62,7 +63,11 @@ public class TmdbService(TMDbClient tmDbClient)
 
         var result = await discoverQuery.Query(page);
 
-        return result.Results.Select(m => new MovieResponse(
+        var filteredResults = result.Results
+            .Where(m => !excludedMovies.Contains(m.Id))
+            .ToList();
+
+        return filteredResults.Select(m => new MovieResponse(
             m.Id,
             m.Title,
             m.Overview,
@@ -73,7 +78,7 @@ public class TmdbService(TMDbClient tmDbClient)
         )).ToList();
     }
 
-    public async Task<List<MovieResponse>> GetMoviesByGenre(int genreId, int page = 1)
+    public async Task<List<MovieResponse>> GetMoviesByGenre(int genreId, int[] excludedMovies, int page = 1)
     {
         var discoverQuery = tmDbClient.DiscoverMoviesAsync();
         if (discoverQuery == null)
@@ -86,7 +91,11 @@ public class TmdbService(TMDbClient tmDbClient)
 
         var result = await discoverQuery.Query(page);
 
-        return result.Results.Select(m => new MovieResponse(
+        var filteredResults = result.Results
+            .Where(m => !excludedMovies.Contains(m.Id))
+            .ToList();
+
+        return filteredResults.Select(m => new MovieResponse(
             m.Id,
             m.Title,
             m.Overview,

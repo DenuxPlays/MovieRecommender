@@ -16,9 +16,15 @@ public class AuthenticationService(ApplicationDbContext context)
         }
 
         var token = authString["Bearer ".Length..].Trim();
+
+        return await GetFromToken(token);
+    }
+
+    public async Task<UserEntity> GetFromToken(string token)
+    {
         if (string.IsNullOrEmpty(token))
         {
-            throw new UnauthorizedAccessException("Invalid or missing token");
+            throw new ArgumentException("Token cannot be null or empty", nameof(token));
         }
 
         var user = await context.Users
@@ -29,5 +35,29 @@ public class AuthenticationService(ApplicationDbContext context)
         }
 
         return user;
+    }
+
+    public async Task<UserEntity?> GetFromTokenOptional(string token)
+    {
+        if (string.IsNullOrEmpty(token))
+        {
+            return null;
+        }
+
+        return await context.Users
+            .FirstOrDefaultAsync(u => u.Token == token);
+    }
+
+    public async Task<bool> IsValidToken(string token)
+    {
+        if (string.IsNullOrEmpty(token))
+        {
+            return false;
+        }
+
+        var user = await context.Users
+            .FirstOrDefaultAsync(u => u.Token == token);
+
+        return user != null;
     }
 }
